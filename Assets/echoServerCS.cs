@@ -6,6 +6,7 @@ using System.Threading; // for Thread
 public class echoServerCS : MonoBehaviour {
 
 	private static bool doStart = false;
+	private static bool doStop = false;
 	private Thread rcvThr;
 	private bool stopThr = false;
 
@@ -14,22 +15,30 @@ public class echoServerCS : MonoBehaviour {
 	}
 	
 	void Update () {
-	
+		if (doStart) {
+			doStart = false;
+			startThread();
+		}
+		if (doStop) {
+			doStop = false;
+			stopThread();
+		}
 	}
 
 	public static void SetStart() {
 		doStart = true;
 	}
 	public static void SetStop() {
-		doStart = false;
+		doStop = true;
 	}
 
 	void startThread() {
-		Debug.Log ("init");
+		Debug.Log ("start Thread");
 		rcvThr = new Thread (new ThreadStart (FuncRcvData));
 		rcvThr.Start ();
 	}
 	void stopThread() {
+		Debug.Log ("stop Thread");
 		stopThr = true;
 		rcvThr.Abort ();
 	}
@@ -40,6 +49,8 @@ public class echoServerCS : MonoBehaviour {
 
 			Thread.Sleep(20);
 		}
+
+		Debug.Log ("exit while");
 	}
 
 }
