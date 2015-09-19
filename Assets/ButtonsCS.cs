@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class ButtonsCS : MonoBehaviour {
-
+	
 	// Use this for initialization
 	void Start () {
 	
