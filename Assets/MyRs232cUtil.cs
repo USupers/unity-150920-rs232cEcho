@@ -8,8 +8,8 @@ namespace NS_MyRs232cUtil
 	public static class MyRs232cUtil {
 		public static bool Open(string portname, out SerialPort sp) {
 			sp = new SerialPort ();
+
 			//      string[] portname = SerialPort.GetPortNames ();
-			//      sp.PortName = portname[0];
 
 			// portname : e.g. "COM3"
 			sp.PortName = portname;
@@ -26,6 +26,11 @@ namespace NS_MyRs232cUtil
 				Debug.LogWarning(e.Message);
 			}
 			return true;
+		}
+
+		public static void Close(ref SerialPort sp) {
+			sp.Close ();
+			sp.Dispose ();
 		}
 	}
 }

@@ -17,8 +17,8 @@ public class rs232cSendCS : MonoBehaviour {
 
 		string msg = "hello";
 		sp.Write (msg);
-		sp.Close ();
-		sp.Dispose ();
+
+		MyRs232cUtil.Close (ref sp);
 	}
 
 	void Start () {
