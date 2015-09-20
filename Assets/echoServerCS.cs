@@ -49,12 +49,15 @@ public class echoServerCS : MonoBehaviour {
 			T_status.text = "closed";
 		}
 		if (mySP.IsOpen) {
-			if (mySP.BytesToRead > 0 && isReading == false) {
+//			if (mySP.BytesToRead > 0 && isReading == false) {
+			if (isReading == false) {
 				T_status.text = "reading";
 				isReading = true;
-				string str = mySP.ReadLine ();
-				T_status.text = str;
-				isReading = false;
+				byte [] data = new byte[100];
+				int len = mySP.Read(data, 0, 100);
+				string str = System.Text.Encoding.ASCII.GetString(data);
+				T_status.text = "has read:" + str;
+//				isReading = false;
 			}
 		}
 	}
