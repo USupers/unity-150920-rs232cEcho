@@ -22,6 +22,8 @@ namespace NS_MyRs232cUtil
 
 			try {
 				sp.Open ();
+				sp.DtrEnable = false;
+				sp.RtsEnable = false;
 			} catch(System.Exception e) {
 				Debug.LogWarning(e.Message);
 				return false;

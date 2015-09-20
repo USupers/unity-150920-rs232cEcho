@@ -12,28 +12,73 @@ public class echoServerCS : MonoBehaviour {
 	private static bool doStart = false;
 	private static bool doStop = false;
 	private Thread rcvThr;
-	private bool stopThr = false;
 
 	public Text T_status;
-	private string lastRcvd;
+	private SerialPort mySP;
 
-	void Start () {
-	
+	float accTime = 0f;
+	private bool isRunning = false;
+	private bool isReading = false;
+
+	void Start() {
+//		StartCoroutine ("SerialCoroutine");
 	}
-	
+
 	void Update () {
+		accTime += Time.deltaTime;
+		if (accTime < 0.3f) {
+			return;
+		}
+		accTime = 0f;
+
 		if (doStart) {
 			doStart = false;
-			startThread();
+			isRunning = true;
+			bool res = MyRs232cUtil.Open ("COM3", out mySP);
+//			mySP.DataReceived += new SerialDataReceivedEventHandler(SPdatarcv);
+			if (res == false) {
+				T_status.text = "open fail";
+				return;
+			}
+			mySP.Write("hello");
 		}
 		if (doStop) {
 			doStop = false;
-			stopThread();
+			isRunning = false;
+			MyRs232cUtil.Close(ref mySP);
+			T_status.text = "closed";
 		}
-		if (lastRcvd.Length > 0) {
-			T_status.text = lastRcvd;
+		if (mySP.IsOpen) {
+			if (mySP.BytesToRead > 0 && isReading == false) {
+				T_status.text = "reading";
+				isReading = true;
+				string str = mySP.ReadLine ();
+				T_status.text = str;
+				isReading = false;
+			}
 		}
 	}
+
+//	IEnumerator SerialCoroutine() 
+//	{
+//		string rcvd;
+//		while (true) {
+//			if (mySP.IsOpen && mySP.BytesToRead > 0) {
+//				rcvd = mySP.ReadLine();
+//				mySP.WriteLine(rcvd);
+//			}
+//			yield return new WaitForSeconds(0.1f);
+//		}
+//	}
+
+//	private static void SPdatarcv(object sender, SerialDataReceivedEventArgs e)
+//	{
+//		SerialPort port = (SerialPort)sender;
+//		byte[] buf = new byte[20];
+//		int len = port.Read (buf, 0, 10);
+//		string rcvd = System.Text.Encoding.ASCII.GetString (buf, 0, len);
+//		port.WriteLine (rcvd);
+//	}
 
 	public static void SetStart() {
 		doStart = true;
@@ -41,45 +86,5 @@ public class echoServerCS : MonoBehaviour {
 	public static void SetStop() {
 		doStop = true;
 	}
-
-	void startThread() {
-		Debug.Log ("start Thread");
-		rcvThr = new Thread (new ThreadStart (FuncRcvData));
-		rcvThr.Start ();
-	}
-	void stopThread() {
-		Debug.Log ("stop Thread");
-		stopThr = true;
-		rcvThr.Abort ();
-	}
-
-	private void FuncRcvData() {
-		SerialPort sp;
-		bool res = MyRs232cUtil.Open ("COM3", out sp);
-		if (res == false) {
-			Debug.Log("exit thread");
-			return; // fail
-		}
-
-		while (stopThr == false) {
-			if (sp.BytesToRead == 0) {
-				Thread.Sleep(100);
-			}
-			string rcvd;
-			rcvd = sp.ReadLine();
-			lastRcvd = rcvd;
-
-			sp.Write(rcvd);
-
-			Thread.Sleep(20);
-		}
-
-		sp.Write ("hello");
-
-//		Debug.Log ("exit while");
-
-		MyRs232cUtil.Close (ref sp);
-
-	}
-
+	
 }
