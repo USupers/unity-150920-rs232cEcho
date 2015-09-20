@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 using System.Threading; // for Thread
 using System.IO.Ports; // for RS-232C
@@ -13,6 +14,9 @@ public class echoServerCS : MonoBehaviour {
 	private Thread rcvThr;
 	private bool stopThr = false;
 
+	public Text T_status;
+	private string lastRcvd;
+
 	void Start () {
 	
 	}
@@ -25,6 +29,9 @@ public class echoServerCS : MonoBehaviour {
 		if (doStop) {
 			doStop = false;
 			stopThread();
+		}
+		if (lastRcvd.Length > 0) {
+			T_status.text = lastRcvd;
 		}
 	}
 
@@ -54,15 +61,22 @@ public class echoServerCS : MonoBehaviour {
 			return; // fail
 		}
 
-//		while (stopThr == false) {
-//
-//
-//			Thread.Sleep(20);
-//		}
+		while (stopThr == false) {
+			if (sp.BytesToRead == 0) {
+				Thread.Sleep(100);
+			}
+			string rcvd;
+			rcvd = sp.ReadLine();
+			lastRcvd = rcvd;
+
+			sp.Write(rcvd);
+
+			Thread.Sleep(20);
+		}
 
 		sp.Write ("hello");
 
-		Debug.Log ("exit while");
+//		Debug.Log ("exit while");
 
 		MyRs232cUtil.Close (ref sp);
 
