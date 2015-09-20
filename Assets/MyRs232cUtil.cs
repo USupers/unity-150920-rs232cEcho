@@ -24,6 +24,7 @@ namespace NS_MyRs232cUtil
 				sp.Open ();
 			} catch(System.Exception e) {
 				Debug.LogWarning(e.Message);
+				return false;
 			}
 			return true;
 		}
