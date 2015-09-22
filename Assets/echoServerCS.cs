@@ -15,11 +15,13 @@ public class echoServerCS : MonoBehaviour {
 
 	public Text T_status;
 	private SerialPort mySP;
+	private string accRcvd = "";
 
 	void Update () {
 		if (doStart) {
 			doStart = false;
 			bool res = MyRs232cUtil.Open ("COM3", out mySP);
+			mySP.ReadTimeout = 1;
 			if (res == false) {
 				T_status.text = "open fail";
 				return;
@@ -32,11 +34,25 @@ public class echoServerCS : MonoBehaviour {
 			T_status.text = "closed";
 		}
 		if (mySP.IsOpen) {
-			byte [] data = new byte[100];
-			int len = mySP.Read(data, 0, 100);
-			string str = System.Text.Encoding.ASCII.GetString(data);
-			T_status.text = "has read:" + str;
+			byte rcv;
+			char tmp;
+			try {
+				rcv = (byte)mySP.ReadByte();
+				if (rcv != 255) {
+					tmp = (char)rcv;
+					if (tmp != 0x0d && tmp != 0x0a) { // not CRLF
+						accRcvd = accRcvd + tmp.ToString();
+					}
+					if (tmp == 0x0d) { // CR
+						mySP.WriteLine(accRcvd);
+						accRcvd = "";
+					}
+				}
+			} catch (System.Exception) {
+			}
+			T_status.text = "has read:" + accRcvd;
 		}
+		Thread.Sleep (20); // without this app will freeze 
 	}
 
 	public static void SetStart() {
