@@ -8,6 +8,8 @@ using System.IO.Ports; // for RS-232C
 using NS_MyRs232cUtil;
 
 /*
+ * v0.2 2015/09/23
+ *   - work in thread
  * v0.1 2015/09/22
  *   - can echo back
  */ 
@@ -16,6 +18,7 @@ public class echoServerCS : MonoBehaviour {
 
 	private static bool doStart = false;
 	private static bool doStop = false;
+	private static bool rcvdCRLF = false;
 	private Thread rcvThr;
 	
 	public InputField IF_comname;
@@ -67,7 +70,7 @@ public class echoServerCS : MonoBehaviour {
 				}
 				if (tmp == 0x0d) { // CR
 					mySP.WriteLine(accRcvd);
-					accRcvd = "";
+					rcvdCRLF = true;
 				}
 			}
 		} catch (System.Exception) {
@@ -92,6 +95,10 @@ public class echoServerCS : MonoBehaviour {
 			if (mySP != null && mySP.IsOpen) {
 				if (rcvAndEcho(ref mySP)) {
 					statusText = "has received: " + accRcvd;
+					if (rcvdCRLF) {
+						rcvdCRLF = false;
+						accRcvd = "";
+					}
 				}
 			}
 			Thread.Sleep(20); // without this app may freeze
@@ -99,6 +106,7 @@ public class echoServerCS : MonoBehaviour {
 		Debug.Log ("func echo stop");
 		MyRs232cUtil.Close(ref mySP);
 		statusText = IF_comname.text + " : closed";
+		doStop = false;
 	}
 	
 }
