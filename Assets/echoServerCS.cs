@@ -22,24 +22,25 @@ public class echoServerCS : MonoBehaviour {
 	public Text T_status;
 	private SerialPort mySP;
 	private string accRcvd = "";
-
+	
 	void Update () {
 		if (doStart) {
 			doStart = false;
-			bool res = MyRs232cUtil.Open (IF_comname.text, out mySP);
-			mySP.ReadTimeout = 1;
-			if (res == false) {
-				T_status.text = "open fail";
-				return;
-			}
-			mySP.Write(">");
+			startThread();
+//			bool res = MyRs232cUtil.Open (IF_comname.text, out mySP);
+//			mySP.ReadTimeout = 1;
+//			if (res == false) {
+//				T_status.text = "open fail";
+//				return;
+//			}
+//			mySP.Write(">");
 		}
 		if (doStop) {
-			doStop = false;
-			MyRs232cUtil.Close(ref mySP);
-			T_status.text = "closed";
+//			doStop = false;
+//			MyRs232cUtil.Close(ref mySP);
+//			T_status.text = "closed";
 		}
-		if (mySP.IsOpen) {
+		if (mySP != null && mySP.IsOpen) {
 			byte rcv;
 			char tmp;
 			try {
@@ -66,6 +67,28 @@ public class echoServerCS : MonoBehaviour {
 	}
 	public static void SetStop() {
 		doStop = true;
+	}
+
+	private void startThread() {
+		rcvThr = new Thread (new ThreadStart (FuncEcho));
+		rcvThr.Start ();
+	}
+	private void OnApplicationQuit() {
+		doStop = true;
+		rcvThr.Abort ();
+	}
+	
+	private void FuncEcho() 
+	{
+		Debug.Log ("func echo start");
+		while (doStop == false) {
+
+
+			Thread.Sleep(20); // without this app may freeze
+		}
+		Debug.Log ("func echo stop");
+		MyRs232cUtil.Close(ref mySP);
+
 	}
 	
 }
