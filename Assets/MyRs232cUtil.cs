@@ -3,6 +3,11 @@ using System.Collections;
 
 using System.IO.Ports; // for RS-232C
 
+/*
+ * v0.1 2015/09/23
+ *   - add Open() and Close()
+ */
+
 namespace NS_MyRs232cUtil
 {
 	public static class MyRs232cUtil {
