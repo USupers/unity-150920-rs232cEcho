@@ -26,7 +26,7 @@ public class echoServerCS : MonoBehaviour {
 				T_status.text = "open fail";
 				return;
 			}
-			mySP.Write("hello");
+			mySP.Write(">");
 		}
 		if (doStop) {
 			doStop = false;
@@ -45,12 +45,12 @@ public class echoServerCS : MonoBehaviour {
 					}
 					if (tmp == 0x0d) { // CR
 						mySP.WriteLine(accRcvd);
+						T_status.text = "has read:" + accRcvd;
 						accRcvd = "";
 					}
 				}
 			} catch (System.Exception) {
 			}
-			T_status.text = "has read:" + accRcvd;
 		}
 		Thread.Sleep (20); // without this app will freeze 
 	}
