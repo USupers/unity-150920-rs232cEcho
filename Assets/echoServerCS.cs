@@ -7,12 +7,18 @@ using System.IO.Ports; // for RS-232C
 
 using NS_MyRs232cUtil;
 
+/*
+ * v0.1 2015/09/22
+ *   - can echo back
+ */ 
+
 public class echoServerCS : MonoBehaviour {
 
 	private static bool doStart = false;
 	private static bool doStop = false;
 	private Thread rcvThr;
-
+	
+	public InputField IF_comname;
 	public Text T_status;
 	private SerialPort mySP;
 	private string accRcvd = "";
@@ -20,7 +26,7 @@ public class echoServerCS : MonoBehaviour {
 	void Update () {
 		if (doStart) {
 			doStart = false;
-			bool res = MyRs232cUtil.Open ("COM3", out mySP);
+			bool res = MyRs232cUtil.Open (IF_comname.text, out mySP);
 			mySP.ReadTimeout = 1;
 			if (res == false) {
 				T_status.text = "open fail";
