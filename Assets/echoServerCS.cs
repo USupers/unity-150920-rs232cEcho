@@ -22,23 +22,14 @@ public class echoServerCS : MonoBehaviour {
 	public Text T_status;
 	private SerialPort mySP;
 	private string accRcvd = "";
-	
+	private string statusText = "";
+
 	void Update () {
+		T_status.text = statusText;
+
 		if (doStart) {
 			doStart = false;
 			startThread();
-//			bool res = MyRs232cUtil.Open (IF_comname.text, out mySP);
-//			mySP.ReadTimeout = 1;
-//			if (res == false) {
-//				T_status.text = "open fail";
-//				return;
-//			}
-//			mySP.Write(">");
-		}
-		if (doStop) {
-//			doStop = false;
-//			MyRs232cUtil.Close(ref mySP);
-//			T_status.text = "closed";
 		}
 		if (mySP != null && mySP.IsOpen) {
 			byte rcv;
@@ -75,12 +66,23 @@ public class echoServerCS : MonoBehaviour {
 	}
 	private void OnApplicationQuit() {
 		doStop = true;
-		rcvThr.Abort ();
+		if (rcvThr != null) {
+			rcvThr.Abort ();
+		}
 	}
 	
 	private void FuncEcho() 
 	{
 		Debug.Log ("func echo start");
+		bool res = MyRs232cUtil.Open (IF_comname.text, out mySP);
+		mySP.ReadTimeout = 1;
+		if (res == false) {
+			statusText = "open fail";
+			return;
+		}
+		statusText = IF_comname.text + " : open";
+		mySP.Write (">");
+
 		while (doStop == false) {
 
 
@@ -88,7 +90,7 @@ public class echoServerCS : MonoBehaviour {
 		}
 		Debug.Log ("func echo stop");
 		MyRs232cUtil.Close(ref mySP);
-
+		statusText = IF_comname.text + " : closed";
 	}
 	
 }
