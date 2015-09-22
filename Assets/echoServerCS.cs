@@ -31,26 +31,6 @@ public class echoServerCS : MonoBehaviour {
 			doStart = false;
 			startThread();
 		}
-		if (mySP != null && mySP.IsOpen) {
-			byte rcv;
-			char tmp;
-			try {
-				rcv = (byte)mySP.ReadByte();
-				if (rcv != 255) {
-					tmp = (char)rcv;
-					if (tmp != 0x0d && tmp != 0x0a) { // not CRLF
-						accRcvd = accRcvd + tmp.ToString();
-					}
-					if (tmp == 0x0d) { // CR
-						mySP.WriteLine(accRcvd);
-						T_status.text = "has read:" + accRcvd;
-						accRcvd = "";
-					}
-				}
-			} catch (System.Exception) {
-			}
-		}
-		Thread.Sleep (20); // without this app will freeze 
 	}
 
 	public static void SetStart() {
@@ -70,7 +50,32 @@ public class echoServerCS : MonoBehaviour {
 			rcvThr.Abort ();
 		}
 	}
-	
+
+	private bool rcvAndEcho(ref SerialPort mySP) {
+		byte rcv;
+		char tmp;
+		bool hasRcvd = false;
+
+		try {
+			rcv = (byte)mySP.ReadByte();
+			if (rcv != 255) {
+				hasRcvd = true;
+
+				tmp = (char)rcv;
+				if (tmp != 0x0d && tmp != 0x0a) { // not CRLF
+					accRcvd = accRcvd + tmp.ToString();
+				}
+				if (tmp == 0x0d) { // CR
+					mySP.WriteLine(accRcvd);
+					accRcvd = "";
+				}
+			}
+		} catch (System.Exception) {
+		}
+
+		return hasRcvd;
+	}
+
 	private void FuncEcho() 
 	{
 		Debug.Log ("func echo start");
@@ -84,8 +89,11 @@ public class echoServerCS : MonoBehaviour {
 		mySP.Write (">");
 
 		while (doStop == false) {
-
-
+			if (mySP != null && mySP.IsOpen) {
+				if (rcvAndEcho(ref mySP)) {
+					statusText = "has received: " + accRcvd;
+				}
+			}
 			Thread.Sleep(20); // without this app may freeze
 		}
 		Debug.Log ("func echo stop");
